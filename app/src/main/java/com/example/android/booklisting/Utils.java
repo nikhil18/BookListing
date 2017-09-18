@@ -142,16 +142,43 @@ public final class Utils {
         // Catch the exception so the app doesn't crash, and print the error message to the logs.
         try {
             JSONObject baseJsonResponce = new JSONObject(bookJSON);
+            if (!baseJsonResponce.isNull("items")) {
             JSONArray itemsArray = baseJsonResponce.getJSONArray("items");
 
             for (int i = 0; i < itemsArray.length(); i++) {
                 JSONObject firstItem = itemsArray.getJSONObject(i);
                 JSONObject volumeInfo = firstItem.getJSONObject("volumeInfo");
                 String title = volumeInfo.getString("title");
-                JSONArray authorsArray = volumeInfo.getJSONArray("authors");
-                String authors = extractAllAuthors(authorsArray);
-                Books book = new Books(title, authors);
+                // Some books don't have an authors node, use try/catch to prevent null pointers
+                JSONArray bookAuthors = null;
+                try {
+                    bookAuthors = volumeInfo.getJSONArray("authors");
+                } catch (JSONException ignored) {
+                }
+                // Convert the authors to a string
+                String bookAuthorsString = "";
+                // If the author is empty, set it as "Unknown"
+                if (bookAuthors == null) {
+                    bookAuthorsString = "Unknown";
+                } else {
+                    // Format the authors as "author1, author2, and author3"
+                    int countAuthors = bookAuthors.length();
+                    for (int e = 0; e < countAuthors; e++) {
+                        String author = bookAuthors.getString(e);
+                        if (bookAuthorsString.isEmpty()) {
+                            bookAuthorsString = author;
+                        } else if (e == countAuthors - 1) {
+                            bookAuthorsString = bookAuthorsString + " and " + author;
+                        } else {
+                            bookAuthorsString = bookAuthorsString + ", " + author;
+                        }
+                    }
+                }
+                Books book = new Books(title, bookAuthorsString);
                 books.add(book);
+            }
+            } else {
+                books = null;
             }
 
         } catch (JSONException e) {
@@ -161,26 +188,8 @@ public final class Utils {
             Log.e("Utils", "Problem parsing the books JSON results", e);
         }
 
-        // Return the list of earthquakes
+        // Return the list of books
         return books;
-    }
-
-    // To extract array of authors and concatenate all author names like "- author1,author2,author3" in a single string
-    private static String extractAllAuthors(JSONArray authorsArray) throws JSONException {
-
-        String authorsList = null;
-
-        if (authorsArray.length() == 0)
-            authorsList = "No Author Found";
-
-        for (int i = 0; i < authorsArray.length(); i++) {
-            if (i == 0)
-                authorsList = "- " + authorsArray.getString(0);
-            else
-                authorsList = authorsList + ", " + authorsArray.getString(i);
-        }
-
-        return authorsList;
     }
 
 }

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Book Listing</string>
+    <string name="nothing_found">Sorry, Couldn\'t find anything relevant :-(</string>
+    <string name="no_internet_found">No internet connection available.</string>
+    <string name="please_enter">Please Enter Something in Search Box</string>
+    <string name="topic_for_book">Topic for which book you want </string>
+    <string name="button_find">Find</string>
+</resources>
